@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> To-Do App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #d3cce3, #e9e4f0);
+      padding: 30px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #5f27cd;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #5f27cd;
+    }
+
+    button.add-btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #5f27cd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button.add-btn:hover {
+      background-color: #341f97;
+    }
+
+    .section-title {
+      font-size: 22px;
+      margin: 20px 0 10px;
+      color: #222;
+    }
+
+    .task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f8f8;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+      transition: transform 0.2s;
+    }
+
+    .task:hover {
+      transform: translateY(-2px);
+    }
+
+    .task p {
+      margin: 0;
+      flex: 1;
+    }
+
+    .task small {
+      display: block;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .actions button {
+      margin-left: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .edit {
+      background-color: #00b894;
+      color: white;
+    }
+
+    .delete {
+      background-color: #d63031;
+      color: white;
+    }
+
+    .complete {
+      background-color: #0984e3;
+      color: white;
+    }
+
+    .edit:hover { background-color: #019875; }
+    .delete:hover { background-color: #c0392b; }
+    .complete:hover { background-color: #0652dd; }
+
+    .tag {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 6px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+
+    .pending-tag {
+      background-color: #ffeaa7;
+      color: #e17055;
+    }
+
+    .completed-tag {
+      background-color: #dfe6e9;
+      color: #2d3436;
+    }
+
+    @media (max-width: 600px) {
+      .task {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1> To-Do App 🚀</h1>
+
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="What do you need to do?">
+      <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+
+    <div class="section-title">🕐 Pending Tasks</div>
+    <div id="pendingTasks"></div>
+
+    <div class="section-title">✅ Completed Tasks</div>
+    <div id="completedTasks"></div>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    function getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleString();
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const text = input.value.trim();
+      if (!text) return alert("Please enter a task.");
+      tasks.push({
+        text,
+        completed: false,
+        createdAt: getCurrentTime(),
+        completedAt: null
+      });
+      input.value = '';
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const pending = document.getElementById("pendingTasks");
+      const completed = document.getElementById("completedTasks");
+      pending.innerHTML = '';
+      completed.innerHTML = '';
+
+      tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+
+        const content = document.createElement("p");
+        content.innerHTML = `
+          <span class="tag ${task.completed ? 'completed-tag' : 'pending-tag'}">
+            ${task.completed ? 'Completed' : 'Pending'}
+          </span><br>
+          <strong>${task.text}</strong><br>
+          <small>Created: ${task.createdAt}</small>
+          ${task.completed ? `<br><small>Done: ${task.completedAt}</small>` : ''}
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const edit = document.createElement("button");
+        edit.className = "edit";
+        edit.innerText = "Edit";
+        edit.onclick = () => editTask(index);
+
+        const del = document.createElement("button");
+        del.className = "delete";
+        del.innerText = "Delete";
+        del.onclick = () => deleteTask(index);
+
+        const toggle = document.createElement("button");
+        toggle.className = "complete";
+        toggle.innerText = task.completed ? "Undo" : "Complete";
+        toggle.onclick = () => toggleComplete(index);
+
+        actions.append(edit, del, toggle);
+        div.append(content, actions);
+
+        if (task.completed) {
+          completed.appendChild(div);
+        } else {
+          pending.appendChild(div);
+        }
+      });
+    }
+
+    function editTask(index) {
+      const newText = prompt("Edit your task:", tasks[index].text);
+      if (newText && newText.trim() !== "") {
+        tasks[index].text = newText.trim();
+        renderTasks();
+      }
+    }
+
+    function deleteTask(index) {
+      if (confirm("Delete this task?")) {
+        tasks.splice(index, 1);
+        renderTasks();
+      }
+    }
+
+    function toggleComplete(index) {
+      tasks[index].completed = !tasks[index].completed;
+      tasks[index].completedAt = tasks[index].completed ? getCurrentTime() : null;
+      renderTasks();
+    }
+  </script>
+
+</body>
+</html>
